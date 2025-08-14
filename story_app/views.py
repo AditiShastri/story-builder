@@ -7,8 +7,8 @@ from dotenv import load_dotenv
 
 # Import your model and the AI services, including the custom exception
 from .models import Story
-from .services import InappropriatePromptError # Import the custom exception
-from .chain import get_story_builder_chain # Import the new chain builder
+from .services import InappropriatePromptError, ImagePaths
+from .chain import get_story_builder_chain
 
 # Load environment variables (like your HUGGINGFACEHUB_API_TOKEN)
 load_dotenv()
@@ -47,12 +47,13 @@ class GeneratorView(View):
             # --- Unpack the results from the chain's output dictionary ---
             package = final_result.get('package')
             image_prompts = final_result.get('prompts')
-            final_image_path = final_result.get('final_image_path')
+            image_paths = final_result.get('image_paths')
 
-            if not all([package, image_prompts, final_image_path]):
+            if not all([package, image_prompts, image_paths]):
                 raise Exception("The AI pipeline failed to return a complete result. One or more steps may have failed.")
 
             # --- Save the complete result to the database ---
+            # NOTE: Your models.py file needs to be updated to have all these fields.
             story_instance = Story.objects.create(
                 user_prompt=user_prompt,
                 story_text=package.story,
@@ -61,22 +62,24 @@ class GeneratorView(View):
                 art_style=package.art_style_and_mood,
                 final_character_prompt=image_prompts.character_prompt,
                 final_background_prompt=image_prompts.background_prompt,
-                combined_image_path=final_image_path,
+                negative_prompt=image_prompts.negative_prompt, # NEW: Save the negative prompt
+                combined_image_path=image_paths.final_scene_template_path,
+                character_image_path=image_paths.character_image_path,
+                background_image_path=image_paths.background_image_path,
             )
 
             context['story'] = story_instance
+            context['image_prompts'] = image_prompts
+            context['image_paths'] = image_paths
 
         except InappropriatePromptError as e:
-            # Catch the specific safety refusal error
             logging.warning(f"Safety guardrail triggered for prompt: '{user_prompt}'")
-            context['error'] = str(e) # Display the AI's refusal message
+            context['error'] = str(e)
         
         except Exception as e:
-            # Catch any other general errors during the pipeline
             logging.error(f"An unexpected error occurred in the generation pipeline: {e}", exc_info=True)
             context['error'] = f"An unexpected error occurred: {e}"
 
-        # --- Render the final result page, showing either the story or an error ---
         return render(request, self.result_template_name, context)
 
 class StoryGalleryView(ListView):
@@ -86,5 +89,5 @@ class StoryGalleryView(ListView):
     model = Story
     template_name = 'story_app/gallery.html'
     context_object_name = 'stories'
-    ordering = ['-created_at'] # Show the newest stories first
-    paginate_by = 9 # Show 9 stories per page
+    ordering = ['-created_at']
+    paginate_by = 9

@@ -33,12 +33,27 @@ class Story(models.Model):
     final_background_prompt = models.TextField(
         help_text="The final, optimized prompt for background image generation."
     )
+    # NEW: Add the negative prompt field
+    negative_prompt = models.TextField(
+        help_text="The detailed negative prompt used for image generation."
+    )
 
-    # Chain 4 Output
+    # Chain 4 Outputs
     combined_image_path = models.CharField(
         max_length=255,
         blank=True,
         help_text="The path to the final combined image in static files."
+    )
+    # NEW: Add fields for individual image paths
+    character_image_path = models.CharField(
+        max_length=255,
+        blank=True,
+        help_text="The path to the individual character image in static files."
+    )
+    background_image_path = models.CharField(
+        max_length=255,
+        blank=True,
+        help_text="The path to the individual background image in static files."
     )
 
     # Timestamp

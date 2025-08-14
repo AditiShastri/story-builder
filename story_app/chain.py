@@ -5,11 +5,12 @@ from dotenv import load_dotenv
 # Import the core logic functions from our services file
 from .services import (
     generate_creative_package,
-    regenerate_character_description, # Import the new fallback function
+    regenerate_character_description,
     engineer_final_prompts,
     generate_and_combine_images,
     CreativePackage,
-    ImagePrompts
+    ImagePrompts,
+    ImagePaths # NEW: Import the new ImagePaths model
 )
 
 # Import LangChain components for building the chain
@@ -27,22 +28,19 @@ class StoryBuilderInput(BaseModel):
 def get_story_builder_chain():
     """
     Assembles and returns the full, invokable LangChain pipeline,
-    now with a conditional fallback for character generation.
+    now with a conditional fallback for character generation and returning all image paths.
     """
     load_dotenv()
     HUGGINGFACEHUB_API_TOKEN = os.getenv("HUGGINGFACEHUB_API_TOKEN")
-    # --- MODIFICATION: Using the more reliable v0.3 model ---
     REPO_ID = "mistralai/Mistral-7B-Instruct-v0.3"
 
     if not HUGGINGFACEHUB_API_TOKEN:
         raise ValueError("HUGGINGFACEHUB_API_TOKEN not found in environment variables.")
 
-    # Define the condition for our branch: does a valid character description exist?
     has_character_description = RunnableLambda(
         lambda x: x.get("package") and x["package"].character_description and x["package"].character_description != "N/A"
     )
 
-    # --- MODIFICATION: Using RunnableBranch for conditional logic ---
     full_chain = (
         RunnablePassthrough.assign(
             # Step 1: Generate the Creative Package
@@ -51,9 +49,7 @@ def get_story_builder_chain():
             ).with_config(run_name="GenerateCreativePackage")
         )
         | RunnableBranch(
-            # If has_character_description is True, do nothing (passthrough).
             (has_character_description, RunnablePassthrough()),
-            # If False, run the fallback function to regenerate the description.
             RunnableLambda(
                 lambda x: regenerate_character_description(x, REPO_ID, HUGGINGFACEHUB_API_TOKEN)
             ).with_config(run_name="RegenerateCharacterDescription_Fallback")
@@ -65,8 +61,9 @@ def get_story_builder_chain():
             ).with_config(run_name="EngineerFinalPrompts")
         )
         | RunnablePassthrough.assign(
-            # Step 3: Generate and Combine Images
-            final_image_path=RunnableLambda(
+            # Step 3: Generate and Combine Images and get all paths
+            # The function now returns an ImagePaths object, which is stored under 'image_paths'
+            image_paths=RunnableLambda(
                 lambda x: generate_and_combine_images(x['prompts'])
             ).with_config(run_name="GenerateAndCombineImages")
         )
@@ -86,13 +83,15 @@ if __name__ == "__main__":
     if final_result:
         package: CreativePackage = final_result.get('package')
         prompts: ImagePrompts = final_result.get('prompts')
-        image_path = final_result.get('final_image_path')
-        if all([package, prompts, image_path]):
+        image_paths: ImagePaths = final_result.get('image_paths') # NEW: Get the ImagePaths object
+        if all([package, prompts, image_paths]):
             print("\n**STORY:**", package.story)
             print("\n**ART STYLE:**", package.art_style_and_mood)
             print("\n**ENGINEERED CHARACTER PROMPT:**", prompts.character_prompt)
             print("\n**ENGINEERED BACKGROUND PROMPT:**", prompts.background_prompt)
-            print("\n**FINAL IMAGE PATH:**", image_path)
+            print("\n**CHARACTER IMAGE PATH:**", image_paths.character_image_path) # NEW
+            print("\n**BACKGROUND IMAGE PATH:**", image_paths.background_image_path) # NEW
+            print("\n**FINAL IMAGE PATH:**", image_paths.final_scene_template_path)
         else:
             print("The chain produced an incomplete result.")
     else:

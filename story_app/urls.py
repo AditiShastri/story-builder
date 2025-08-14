@@ -1,10 +1,9 @@
-from django.urls import path
-from .views import GeneratorView
+# story_app/urls.py (Recommended name)
 
-# This is where you map URLs to Views.
-# The `name` parameter is important as it's used by `{% url '...' %}` in templates.
+from django.urls import path
+from .views import GeneratorView, StoryGalleryView  # Import the new view
+
 urlpatterns = [
-    # The path '' means the root of your app.
-    # We've named it 'home' to match your index.html form action.
     path('', GeneratorView.as_view(), name='home'),
+    path('gallery/', StoryGalleryView.as_view(), name='gallery'), # Add this line
 ]

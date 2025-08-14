@@ -1,0 +1,111 @@
+
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Story Gallery</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap');
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f3f4f6;
+        }
+        .prompt-box {
+            background-color: #f9fafb;
+            border-left: 3px solid #60a5fa;
+            padding: 0.75rem;
+            border-radius: 0.5rem;
+            font-family: monospace;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+            font-size: 0.875rem; /* text-sm */
+        }
+    </style>
+</head>
+<body class="bg-gray-100 min-h-screen p-4">
+
+    <header class="bg-white shadow-sm sticky-top">
+        <div class="container mx-auto max-w-7xl">
+            <div class="flex items-center justify-between py-3 px-4">
+                <a href="{% url 'home' %}" class="flex items-center">
+                    <svg width="32" height="32" class="text-blue-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09zM18.259 8.715L18 9.75l-.259-1.035a3.375 3.375 0 00-2.455-2.456L14.25 6l1.036-.259a3.375 3.375 0 002.455-2.456L18 2.25l.259 1.035a3.375 3.375 0 002.456 2.456L21.75 6l-1.035.259a3.375 3.375 0 00-2.456 2.456zM16.898 20.624L16.5 21.75l-.398-1.126a3.375 3.375 0 00-2.924-2.924l-1.126-.398 1.126-.398a3.375 3.375 0 002.924-2.924l.398-1.126.398 1.126a3.375 3.375 0 002.924 2.924l1.126.398-1.126.398a3.375 3.375 0 00-2.924 2.924z" />
+                    </svg>
+                    <span class="ml-2 text-2xl font-bold text-gray-800">Tale Loom 🧵 </span>
+                </a>
+            </div>
+        </div>
+    </header>
+
+    <div class="container mx-auto max-w-7xl mt-5">
+        <h1 class="text-4xl font-bold text-gray-800 mb-6 text-center">Story Generation History</h1>
+        <div class="flex justify-center mb-8">
+            <a href="{% url 'home' %}" class="inline-block bg-blue-500 text-white font-semibold py-3 px-6 rounded-full shadow-lg hover:bg-blue-600 transition duration-300">
+                Create a New Story
+            </a>
+        </div>
+
+        {% if stories %}
+            <div class="space-y-8">
+                {% for story in stories %}
+                    <div class="bg-white rounded-xl shadow-xl p-6">
+                        <h2 class="text-2xl font-bold text-gray-700 mb-2">Original Prompt:</h2>
+                        <p class="text-gray-600 mb-6 italic">"{{ story.user_prompt }}"</p>
+                        
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-8 mb-6">
+                            <div>
+                                <h3 class="text-xl font-semibold text-gray-600 mb-2">Final Scene</h3>
+                                <img src="{% static story.combined_image_path %}" alt="Final composite scene image" class="rounded-lg shadow-md w-full h-auto">
+                            </div>
+
+                            <div>
+                                <h3 class="text-xl font-semibold text-gray-600 mb-2">Generated Story</h3>
+                                <div class="bg-gray-50 p-4 rounded-lg h-full overflow-y-auto max-h-96">
+                                    <p class="text-gray-600 leading-relaxed whitespace-pre-wrap">{{ story.story_text }}</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="space-y-4">
+                            <h3 class="text-xl font-semibold text-gray-600">Prompts Used:</h3>
+                            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                                <div class="flex flex-col">
+                                    <p class="font-medium text-gray-700">Character Prompt:</p>
+                                    <div class="prompt-box flex-grow">{{ story.final_character_prompt }}</div>
+                                </div>
+                                <div class="flex flex-col">
+                                    <p class="font-medium text-gray-700">Background Prompt:</p>
+                                    <div class="prompt-box flex-grow">{{ story.final_background_prompt }}</div>
+                                </div>
+                                <div class="flex flex-col">
+                                    <p class="font-medium text-gray-700">Negative Prompt:</p>
+                                    <div class="prompt-box flex-grow">{{ story.negative_prompt }}</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="mt-6">
+                            <h3 class="text-xl font-semibold text-gray-600 mb-2">Individual Assets:</h3>
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div>
+                                    <p class="font-medium text-gray-700 mb-1">Character Image</p>
+                                    <img src="{% static story.character_image_path %}" alt="Individual character asset" class="rounded-lg shadow-md w-full h-auto">
+                                </div>
+                                <div>
+                                    <p class="font-medium text-gray-700 mb-1">Background Image</p>
+                                    <img src="{% static story.background_image_path %}" alt="Individual background asset" class="rounded-lg shadow-md w-full h-auto">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+        {% else %}
+            <p class="text-center text-gray-500 text-lg">No stories have been generated yet. Go create one!</p>
+        {% endif %}
+    </div>
+</body>
+</html>
