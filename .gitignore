@@ -1,0 +1,11 @@
+.env
+db.sqlite3
+static
+output/
+env/
+myproject/__pycache__
+story_app/__pycache__
+story_app/migrations/
+story_app/image_test.py
+story_app/test.py
+story_app/orchestrator.py

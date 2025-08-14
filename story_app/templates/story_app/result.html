@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Your Generated Story - StoryWeaver AI</title>
+    
+    <!-- Bootstrap CSS and Google Fonts (same as index.html) -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f8f9fa;
+        }
+        .story-content p {
+            font-size: 1.1rem;
+            line-height: 1.7;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Header (same as index.html for consistency) -->
+    <header class="bg-white shadow-sm sticky-top">
+        <div class="container">
+            <div class="d-flex align-items-center justify-content-start py-3">
+                <svg width="32" height="32" class="text-primary" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09zM18.259 8.715L18 9.75l-.259-1.035a3.375 3.375 0 00-2.455-2.456L14.25 6l1.036-.259a3.375 3.375 0 002.455-2.456L18 2.25l.259 1.035a3.375 3.375 0 002.456 2.456L21.75 6l-1.035.259a3.375 3.375 0 00-2.456 2.456zM16.898 20.624L16.5 21.75l-.398-1.126a3.375 3.375 0 00-2.924-2.924l-1.126-.398 1.126-.398a3.375 3.375 0 002.924-2.924l.398-1.126.398 1.126a3.375 3.375 0 002.924 2.924l1.126.398-1.126.398a3.375 3.375 0 00-2.924 2.924z" /></svg>
+                <span class="ms-2 fs-4 fw-bold text-dark">StoryWeaver AI</span>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content Area -->
+    <main class="container mt-5">
+        <div class="row justify-content-center">
+            <div class="col-lg-10">
+                
+                {% if error %}
+                <!-- Error Display -->
+                <div class="bg-white p-4 p-md-5 rounded-3 shadow-lg border border-danger">
+                    <h1 class="display-5 fw-bold text-danger">An Error Occurred</h1>
+                    <p class="lead text-muted mt-3">We couldn't generate your story. Here's the error message:</p>
+                    <div class="alert alert-danger mt-3">
+                        {{ error }}
+                    </div>
+                    <p class="mt-4"><strong>Your Original Prompt:</strong> "{{ user_prompt }}"</p>
+                    <a href="{% url 'home' %}" class="btn btn-primary btn-lg mt-3">Try Again</a>
+                </div>
+
+                {% else %}
+                <!-- Success Display -->
+                <div class="bg-white p-4 p-md-5 rounded-3 shadow-lg border">
+                    <p class="text-muted">Your idea: "{{ story.user_prompt }}"</p>
+                    <h1 class="display-5 fw-bold mt-2">Your Generated Scene</h1>
+                    
+                    <div class="mt-4">
+                        {% load static %}
+                        <img src="{% static story.combined_image_path %}" class="img-fluid rounded shadow" alt="Generated scene image">
+                    </div>
+
+                    <hr class="my-5">
+
+                    <div class="story-content">
+                        <h2 class="fw-bold">The Story 📜</h2>
+                        <p>{{ story.story_text|linebreaks }}</p>
+
+                        <h2 class="fw-bold mt-5">Character Details 🧑‍🚀</h2>
+                        <p>{{ story.character_description }}</p>
+
+                        <!-- MODIFIED SECTION: Added Background Details -->
+                        <h2 class="fw-bold mt-5">Background Details 🏞️</h2>
+                        <p>{{ story.background_description }}</p>
+                    </div>
+                    
+                    <div class="text-center mt-5">
+                         <a href="{% url 'home' %}" class="btn btn-primary btn-lg">Create Another Story</a>
+                    </div>
+                </div>
+                {% endif %}
+
+            </div>
+        </div>
+    </main>
+    
+    <!-- Footer -->
+    <footer class="bg-white mt-5 py-4 border-top">
+        <div class="container text-center text-muted">
+            <p>&copy; 2025 StoryWeaver AI. A Creative Project.</p>
+        </div>
+    </footer>
+
+</body>
+</html>
