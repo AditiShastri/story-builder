@@ -8,6 +8,8 @@ Project Tale Loom 🧵 application uses a multi-stage, AI-driven architecture to
 3.  **Image Generation**: These image prompts are then passed to the OFA-Sys/small-stable-diffusion-v0 model, which generates the individual character and background images.
 4.  **Final Output**: The generated character and background images are combined into a single, cohesive image, and presented to the user along with the story.
 
+<img width="1187" height="1029" alt="Screenshot 2025-08-14 224542" src="https://github.com/user-attachments/assets/037a5f7f-d710-433a-849d-89b7e003bb45" />
+
 ### Project Setup and Execution
 
 This guide provides a step-by-step process to set up and run the `story-builder` project.
